@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
 using Supernova.Dapper.ConsoleTests.Models;
+using Supernova.Dapper.ConsoleTests.Repository;
 using Supernova.Dapper.Core.Factories;
 using Supernova.Dapper.Factories;
 using Supernova.Dapper.Initialization;
@@ -20,13 +22,25 @@ namespace Supernova.Dapper.ConsoleTests
             DapperStartupMapping.RegisterCustomMaps("Supernova.Dapper.ConsoleTests.Models");
             IConnectionFactory connectionFactory = new ConnectionFactory("DefaultConnection");
             IParser<int> parser = new SqlParser<int>();
-            ParsedQuery getAll = parser.Select<TestEntity>(ColumnTypes.EntityColumns);
+            TestRepository repository = new TestRepository(connectionFactory, parser);
+
 
             using (IDbConnection connection = connectionFactory.GetConnection())
             {
-                TestEntity currentEntry = connection
-                    .Query<TestEntity>(getAll.Query.ToString(), getAll.Parameters)
-                    .FirstOrDefault();
+                TestEntity entity = new TestEntity
+                {
+                    SomeDateTimeField = DateTime.Now,
+                    SomeGuidField = Guid.NewGuid(),
+                    TextField = "this is the end, my beautiful friend, the end"
+                };
+
+                var allEntities = repository.GetAll();
+                repository.Insert(entity);
+
+                var currentEntity = repository.GetById(3);
+                currentEntity.TextField = "rekt";
+
+                repository.Update(currentEntity);
             }
         }
     }

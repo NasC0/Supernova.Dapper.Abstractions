@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Dapper;
 using Supernova.Dapper.Core.Attributes;
 using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Parser.Core;
@@ -11,8 +12,6 @@ namespace Supernova.Dapper.Parser.Base
 {
     public abstract class BaseParser<TIdType> : IParser<TIdType>
     {
-        protected virtual string EscapeFormat => string.Empty;
-
         public abstract ParsedQuery Select<TEntity>() where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Select<TEntity>(ColumnTypes columns) where TEntity : IEntity<TIdType>;
@@ -20,7 +19,7 @@ namespace Supernova.Dapper.Parser.Base
         public abstract ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey) 
             where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery Update<TEntity>() where TEntity : IEntity<TIdType>;
+        public abstract ParsedQuery Update<TEntity>(TEntity entity) where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Delete<TEntity>() where TEntity : IEntity<TIdType>;
 
@@ -38,13 +37,23 @@ namespace Supernova.Dapper.Parser.Base
 
             if (!string.IsNullOrWhiteSpace(tableNameAttribute?.Name))
             {
-                if (!string.IsNullOrWhiteSpace(EscapeFormat))
-                {
-                    return string.Format(EscapeFormat, tableNameAttribute.Name);
-                }
+                return tableNameAttribute.Name;
             }
 
             throw new InvalidOperationException($"Missing tablename attribute for entity {entityType.Name} in {entityType.Namespace} namespace");
+        }
+
+        public string GetColumnNameFromPropertyName<TEntity>(string propertyName)
+            where TEntity : IEntity<TIdType>
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                return null;
+            }
+
+            Type type = typeof(TEntity);
+            PropertyInfo property = type.GetProperty(propertyName);
+            return GetColumnNameFromProperty(property, true);
         }
 
         protected virtual IEnumerable<string> GetEntityColumnNames<TEntity>(bool includePrimaryKey)
@@ -55,7 +64,11 @@ namespace Supernova.Dapper.Parser.Base
             List<string> columnNames = new List<string>();
             foreach (PropertyInfo property in entityProperties)
             {
-                columnNames.Add(GetColumnNameFromProperty(property, includePrimaryKey));
+                string columnName = GetColumnNameFromProperty(property, includePrimaryKey);
+                if (!string.IsNullOrWhiteSpace(columnName))
+                {
+                    columnNames.Add(columnName);
+                }
             }
 
             return columnNames;
@@ -71,8 +84,12 @@ namespace Supernova.Dapper.Parser.Base
                 columnName = property.Name;
             }
 
-            if ((attribute is PrimaryKeyAttribute && includePrimaryKey)
-                || attribute is ColumnAttribute)
+            if (attribute is PrimaryKeyAttribute && !includePrimaryKey)
+            {
+                return null;
+            }
+
+            if (attribute != null)
             {
                 if (!string.IsNullOrWhiteSpace(attribute.Name))
                 {
@@ -80,25 +97,26 @@ namespace Supernova.Dapper.Parser.Base
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(EscapeFormat))
-            {
-                columnName = string.Format(EscapeFormat, columnName);
-            }
-
             return columnName;
         }
 
-        public string GetColumnNameFromPropertyName<TEntity>(string propertyName)
+        protected virtual DynamicParameters GetEntityParameters<TEntity>(TEntity entity, bool includePrimaryKey, string parameterKeySeed = "")
             where TEntity : IEntity<TIdType>
         {
-            if (string.IsNullOrWhiteSpace(propertyName))
+            Type entityType = entity.GetType();
+            DynamicParameters parameters = new DynamicParameters();
+            PropertyInfo[] properties = entityType.GetProperties();
+            foreach (PropertyInfo property in properties)
             {
-                return null;
+                string columnName = GetColumnNameFromProperty(property, includePrimaryKey);
+                if (!string.IsNullOrWhiteSpace(columnName))
+                {
+                    string parameter = string.Format("@{0}{1}", columnName, parameterKeySeed);
+                    parameters.Add(parameter, property.GetValue(entity));
+                }
             }
 
-            Type type = typeof(TEntity);
-            PropertyInfo property = type.GetProperty(propertyName);
-            return GetColumnNameFromProperty(property, true);
+            return parameters;
         }
     }
 }

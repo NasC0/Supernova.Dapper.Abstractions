@@ -51,31 +51,30 @@
     <Compile Include="Models\TestEntity.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\TestRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Supernova.Dapper.Core\Supernova.Dapper.Core.csproj">
-      <Project>{D48820FF-6545-4478-8045-9D265FC080F7}</Project>
+      <Project>{d48820ff-6545-4478-8045-9d265fc080f7}</Project>
       <Name>Supernova.Dapper.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Supernova.Dapper.Parser.Core\Supernova.Dapper.Parser.Core.csproj">
-      <Project>{07CF0B39-B740-42D4-B813-E23AEDFA16FE}</Project>
+      <Project>{07cf0b39-b740-42d4-b813-e23aedfa16fe}</Project>
       <Name>Supernova.Dapper.Parser.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Supernova.Dapper.Parser\Supernova.Dapper.Parser.csproj">
-      <Project>{BC8C1375-1FD6-4718-AD41-5807A6369140}</Project>
+      <Project>{bc8c1375-1fd6-4718-ad41-5807a6369140}</Project>
       <Name>Supernova.Dapper.Parser</Name>
     </ProjectReference>
     <ProjectReference Include="..\Supernova.Dapper\Supernova.Dapper.csproj">
-      <Project>{EA48BED7-B44F-4D34-98CE-DA1985BE9362}</Project>
+      <Project>{ea48bed7-b44f-4d34-98ce-da1985be9362}</Project>
       <Name>Supernova.Dapper</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Repositories\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

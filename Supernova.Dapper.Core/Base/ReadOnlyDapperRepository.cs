@@ -9,6 +9,7 @@ namespace Supernova.Dapper.Core.Base
 {
     public abstract class ReadOnlyDapperRepository<TIdType, TResultEntity> : 
         IReadOnlyDapperRepository<TIdType, TResultEntity>
+        where TIdType : new()
         where TResultEntity : IEntity<TIdType>
     {
         private readonly IConnectionFactory _connectionFactory;

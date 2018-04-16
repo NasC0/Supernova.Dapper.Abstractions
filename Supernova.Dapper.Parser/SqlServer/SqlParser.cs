@@ -9,13 +9,12 @@ using Supernova.Dapper.Parser.Core.Models;
 namespace Supernova.Dapper.Parser.SqlServer
 {
     public class SqlParser<TIdType> : BaseParser<TIdType>
+        where TIdType : new()
     {
         private const string SelectAllColumns = "*";
         private const string WhereFilterKeyword = "WHERE";
         private const string AndFilterKeyword = "AND";
         private const string OrFilterKeyword = "OR";
-
-        protected override string EscapeFormat => "[{0}]";
 
         public override ParsedQuery Select<TEntity>()
         {
@@ -28,7 +27,7 @@ namespace Supernova.Dapper.Parser.SqlServer
             switch (columns)
             {
                 case ColumnTypes.EntityColumns:
-                    selectColumns = string.Join(", ", GetEntityColumnNames<TEntity>(false));
+                    selectColumns = string.Join(", ", GetEntityColumnNames<TEntity>(true));
                     break;
                 default:
                     selectColumns = SelectAllColumns;
@@ -52,19 +51,43 @@ namespace Supernova.Dapper.Parser.SqlServer
             StringBuilder queryBuilder = new StringBuilder();
 
             queryBuilder.AppendLine($"INSERT INTO {tableName}");
+
             IEnumerable<string> columnNames = GetEntityColumnNames<TEntity>(includePrimaryKey);
             string columnsToInsert = string.Format("({0})", string.Join(", ", columnNames));
             queryBuilder.AppendLine(columnsToInsert);
 
-            // TODO: Finish logic for inserting fields - get dynamic parameters for insertions
+            DynamicParameters parameters = GetEntityParameters(entity, includePrimaryKey);
+            string joinedParameters = "@" + string.Join(", @", parameters.ParameterNames);
+            queryBuilder.AppendLine(string.Format("VALUES ({0})", joinedParameters));
 
             query.Query = queryBuilder;
+            query.Parameters = parameters;
             return query;
         }
 
-        public override ParsedQuery Update<TEntity>()
+        public override ParsedQuery Update<TEntity>(TEntity entity)
         {
-            return null;
+            string tableName = GetEntityTableName<TEntity>();
+            ParsedQuery query = new ParsedQuery();
+            StringBuilder queryBuilder = new StringBuilder();
+
+            queryBuilder.AppendLine($"UPDATE {tableName}");
+            IEnumerable<string> columnNames = GetEntityColumnNames<TEntity>(false);
+            List<string> parameterPairs = new List<string>();
+
+            foreach (string columnName in columnNames)
+            {
+                parameterPairs.Add(string.Format("{0} = @{0}", columnName));
+            }
+
+            queryBuilder.AppendLine(string.Format("SET {0}", string.Join(", ", parameterPairs)));
+            DynamicParameters parameters = GetEntityParameters(entity, false);
+
+            query.Query = queryBuilder;
+            query.Parameters = parameters;
+
+            query = Where<TEntity>(query, nameof(IEntity<TIdType>.Id), entity.Id);
+            return query;
         }
 
         public override ParsedQuery Delete<TEntity>()
@@ -100,7 +123,7 @@ namespace Supernova.Dapper.Parser.SqlServer
             string columnName = GetColumnNameFromPropertyName<TEntity>(paramaterNameToFilter);
 
             query.Query.AppendLine($"{filterKeyword} {columnName} = @{columnName}");
-            query.Parameters.Add($@"{columnName}", value);
+            query.Parameters.Add($"@{columnName}", value);
 
             return query;
         }

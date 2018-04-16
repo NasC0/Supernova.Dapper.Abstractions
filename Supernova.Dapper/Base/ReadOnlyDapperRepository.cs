@@ -32,7 +32,7 @@ namespace Supernova.Dapper.Base
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {
                 return sqlConnection
-                    .Query<TEntity>(query.ToString(), query.Parameters)
+                    .Query<TEntity>(query.Query.ToString(), query.Parameters)
                     .FirstOrDefault();
             }
         }
@@ -51,23 +51,8 @@ namespace Supernova.Dapper.Base
 
         public virtual bool Exists(TIdType id)
         {
-            string tableName = _queryParser.GetEntityTableName<TEntity>();
-            string idParameterName = 
-                _queryParser.GetColumnNameFromPropertyName<TEntity>(nameof(IEntity<TIdType>.Id));
-
-            string selectionSql = $"SELECT Count({idParameterName}) FROM " +
-                                  tableName +
-                                  $"WHERE Id = @Id";
-
-            DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("@Id", id);
-
-            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
-            {
-                int count = sqlConnection.ExecuteScalar<int>(selectionSql, parameters);
-                bool recordExists = count > 0;
-                return recordExists;
-            }
+            TEntity result = GetById(id);
+            return result == null;
         }
     }
 }

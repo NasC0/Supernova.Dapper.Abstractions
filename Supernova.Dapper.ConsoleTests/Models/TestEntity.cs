@@ -7,15 +7,15 @@ namespace Supernova.Dapper.ConsoleTests.Models
     [TableName("FirstTable")]
     public class TestEntity : IEntity<int>
     {
-        [PrimaryKey]
+        [PrimaryKey("TableId")]
         public int Id { get; set; }
 
         public string TextField { get; set; }
 
-        [Column("DateTimeField")]
+        [Column("DateTime")]
         public DateTime SomeDateTimeField { get; set; }
 
-        [Column("GuidField")]
+        [Column("MuchoGuid")]
         public Guid SomeGuidField { get; set; }
     }
 }

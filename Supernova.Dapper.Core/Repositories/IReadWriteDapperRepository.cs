@@ -7,18 +7,18 @@ namespace Supernova.Dapper.Core.Repositories
         IReadOnlyDapperRepository<TIdType, TEntity>
         where TEntity : IEntity<TIdType>
     {
-    void Insert(TEntity entity);
+        void Insert(TEntity entity);
 
-    void BulkInsert(IEnumerable<TEntity> entities);
+        void BulkInsert(IEnumerable<TEntity> entities);
 
-    void Update(TEntity update);
+        void Update(TEntity update);
 
-    void BulkUpdate(TEntity update);
+        void BulkUpdate(TEntity update);
 
-    void Delete(TIdType id);
+        void Delete(TIdType id);
 
-    void BulkDelete(IEnumerable<TIdType> ids);
+        void BulkDelete(IEnumerable<TIdType> ids);
 
-    void BulkDelete(IEnumerable<TEntity> entities);
+        void BulkDelete(IEnumerable<TEntity> entities);
     }
 }
