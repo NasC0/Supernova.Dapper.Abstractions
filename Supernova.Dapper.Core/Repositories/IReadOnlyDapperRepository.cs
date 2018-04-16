@@ -5,6 +5,8 @@ namespace Supernova.Dapper.Core.Repositories
 {
     public interface IReadOnlyDapperRepository<in TIdType, out TResultEntity>
     {
+        string TableName { get; set; }
+
         TResultEntity GetById(TIdType id);
 
         IEnumerable<TResultEntity> GetAll();

@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Supernova.Dapper</AssemblyName>
+    <RootNamespace>Supernova.Dapper</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

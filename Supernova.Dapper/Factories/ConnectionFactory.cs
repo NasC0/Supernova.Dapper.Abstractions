@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Supernova.Dapper.Core.Factories;
 
-namespace Supernova.Dapper.Concrete.Factories
+namespace Supernova.Dapper.Factories
 {
     public class ConnectionFactory : IConnectionFactory
     {
