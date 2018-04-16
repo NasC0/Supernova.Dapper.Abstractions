@@ -90,9 +90,13 @@ namespace Supernova.Dapper.Parser.SqlServer
             return query;
         }
 
-        public override ParsedQuery Delete<TEntity>()
+        public override ParsedQuery Delete<TEntity>(TIdType id)
         {
-            return null;
+            ParsedQuery query = Where<TEntity>(null, nameof(IEntity<TIdType>.Id), id);
+            string tableName = GetEntityTableName<TEntity>();
+            query.Query.Insert(0, $"DELETE FROM {tableName} ");
+
+            return query;
         }
 
         public override ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value)

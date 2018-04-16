@@ -12,6 +12,8 @@ namespace Supernova.Dapper.Parser.Base
 {
     public abstract class BaseParser<TIdType> : IParser<TIdType>
     {
+        protected string _tableName;
+
         public abstract ParsedQuery Select<TEntity>() where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Select<TEntity>(ColumnTypes columns) where TEntity : IEntity<TIdType>;
@@ -21,7 +23,7 @@ namespace Supernova.Dapper.Parser.Base
 
         public abstract ParsedQuery Update<TEntity>(TEntity entity) where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery Delete<TEntity>() where TEntity : IEntity<TIdType>;
+        public abstract ParsedQuery Delete<TEntity>(TIdType id) where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
 
@@ -31,16 +33,22 @@ namespace Supernova.Dapper.Parser.Base
 
         public virtual string GetEntityTableName<TEntity>() where TEntity : IEntity<TIdType>
         {
-            Type entityType = typeof(TEntity);
-            TableNameAttribute tableNameAttribute = 
-                entityType.GetCustomAttribute<TableNameAttribute>();
-
-            if (!string.IsNullOrWhiteSpace(tableNameAttribute?.Name))
+            if (string.IsNullOrWhiteSpace(_tableName))
             {
-                return tableNameAttribute.Name;
+                Type entityType = typeof(TEntity);
+                TableNameAttribute tableNameAttribute =
+                    entityType.GetCustomAttribute<TableNameAttribute>();
+
+                if (!string.IsNullOrWhiteSpace(tableNameAttribute?.Name))
+                {
+                    _tableName = tableNameAttribute.Name;
+                    return _tableName;
+                }
+
+                throw new InvalidOperationException($"Missing tablename attribute for entity {entityType.Name} in {entityType.Namespace} namespace");
             }
 
-            throw new InvalidOperationException($"Missing tablename attribute for entity {entityType.Name} in {entityType.Namespace} namespace");
+            return _tableName;
         }
 
         public string GetColumnNameFromPropertyName<TEntity>(string propertyName)

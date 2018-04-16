@@ -41,7 +41,14 @@ namespace Supernova.Dapper.Base
 
         public abstract void BulkUpdate(TEntity update);
 
-        public abstract void Delete(TIdType id);
+        public virtual void Delete(TIdType id)
+        {
+            ParsedQuery query = _queryParser.Delete<TEntity>(id);
+            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+            {
+                sqlConnection.Query(query.Query.ToString(), query.Parameters);
+            }
+        }
 
         public abstract void BulkDelete(IEnumerable<TIdType> ids);
 

@@ -14,7 +14,7 @@ namespace Supernova.Dapper.Parser.Core
 
         ParsedQuery Update<TEntity>(TEntity entity) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery Delete<TEntity>() where TEntity : IEntity<TIdType>;
+        ParsedQuery Delete<TEntity>(TIdType id) where TEntity : IEntity<TIdType>;
 
         ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
 

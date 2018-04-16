@@ -38,9 +38,11 @@ namespace Supernova.Dapper.ConsoleTests
                 repository.Insert(entity);
 
                 var currentEntity = repository.GetById(3);
-                currentEntity.TextField = "rekt";
+                currentEntity.TextField = "teehee";
 
                 repository.Update(currentEntity);
+
+                repository.Delete(3);
             }
         }
     }

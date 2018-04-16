@@ -24,11 +24,6 @@ namespace Supernova.Dapper.ConsoleTests.Repository
             throw new NotImplementedException();
         }
 
-        public override void Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void BulkDelete(IEnumerable<int> ids)
         {
             throw new NotImplementedException();
