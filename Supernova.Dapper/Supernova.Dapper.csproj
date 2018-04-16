@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Supernova.Dapper.Core\Supernova.Dapper.Core.csproj" />
+    <ProjectReference Include="..\Supernova.Dapper.Parser.Core\Supernova.Dapper.Parser.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

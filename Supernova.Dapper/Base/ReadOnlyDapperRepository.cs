@@ -2,57 +2,61 @@
 using System.Data;
 using System.Linq;
 using Dapper;
+using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Core.Factories;
 using Supernova.Dapper.Core.Repositories;
+using Supernova.Dapper.Parser.Core;
+using Supernova.Dapper.Parser.Core.Models;
 
 namespace Supernova.Dapper.Base
 {
-    public abstract class ReadOnlyDapperRepository<TIdType, TResultEntity> : 
-        IReadOnlyDapperRepository<TIdType, TResultEntity>
+    public abstract class ReadOnlyDapperRepository<TIdType, TEntity> : 
+        IReadOnlyDapperRepository<TIdType, TEntity> 
+        where TEntity : IEntity<TIdType>
     {
+        protected readonly IParser<TIdType> _queryParser;
         protected readonly IConnectionFactory _connectionFactory;
 
-        protected ReadOnlyDapperRepository(IConnectionFactory connectionFactory)
+        protected ReadOnlyDapperRepository(IConnectionFactory connectionFactory,
+            IParser<TIdType> queryParser)
         {
             _connectionFactory = connectionFactory;
+            _queryParser = queryParser;
         }
 
-        public virtual string TableName { get; set; }
-
-        public virtual TResultEntity GetById(TIdType id)
+        public virtual TEntity GetById(TIdType id)
         {
-            string selectionSql = $"SELECT * FROM " +
-                                  $"{TableName} " +
-                                  $"WHERE Id = @Id";
-
-            DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("@Id", id);
+            ParsedQuery query = _queryParser.Select<TEntity>();
+            query = _queryParser.Where<TEntity>(query, nameof(IEntity<TIdType>.Id), id);
 
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {
                 return sqlConnection
-                    .Query<TResultEntity>(selectionSql, parameters)
+                    .Query<TEntity>(query.ToString(), query.Parameters)
                     .FirstOrDefault();
             }
         }
 
-        public virtual IEnumerable<TResultEntity> GetAll()
+        public virtual IEnumerable<TEntity> GetAll()
         {
-            string selectionSql = "SELECT * " +
-                                  $"FROM {TableName}";
+            ParsedQuery query = _queryParser.Select<TEntity>();
 
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {
                 return sqlConnection
-                    .Query<TResultEntity>(selectionSql)
+                    .Query<TEntity>(query.Query.ToString(), query.Parameters)
                     .ToList();
             }
         }
 
         public virtual bool Exists(TIdType id)
         {
-            string selectionSql = $"SELECT Count(Id) FROM " +
-                                  $"{TableName} " +
+            string tableName = _queryParser.GetEntityTableName<TEntity>();
+            string idParameterName = 
+                _queryParser.GetColumnNameFromPropertyName<TEntity>(nameof(IEntity<TIdType>.Id));
+
+            string selectionSql = $"SELECT Count({idParameterName}) FROM " +
+                                  tableName +
                                   $"WHERE Id = @Id";
 
             DynamicParameters parameters = new DynamicParameters();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Core.Factories;
 using Supernova.Dapper.Core.Repositories;
 
@@ -8,6 +9,7 @@ namespace Supernova.Dapper.Core.Base
 {
     public abstract class ReadOnlyDapperRepository<TIdType, TResultEntity> : 
         IReadOnlyDapperRepository<TIdType, TResultEntity>
+        where TResultEntity : IEntity<TIdType>
     {
         private readonly IConnectionFactory _connectionFactory;
 

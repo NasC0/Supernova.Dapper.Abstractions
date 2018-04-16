@@ -3,21 +3,22 @@ using Supernova.Dapper.Core.Entities;
 
 namespace Supernova.Dapper.Core.Repositories
 {
-    public interface IReadWriteDapperRepository<in TIdType, in TInputEntity, out TResultEntity> : 
-        IReadOnlyDapperRepository<TIdType, TResultEntity> where TInputEntity : IEntity<TIdType>
+    public interface IReadWriteDapperRepository<in TIdType, TEntity> :
+        IReadOnlyDapperRepository<TIdType, TEntity>
+        where TEntity : IEntity<TIdType>
     {
-        void Insert(TInputEntity entity);
+    void Insert(TEntity entity);
 
-        void BulkInsert(IEnumerable<TInputEntity> entities);
+    void BulkInsert(IEnumerable<TEntity> entities);
 
-        void Update(TInputEntity update);
+    void Update(TEntity update);
 
-        void BulkUpdate(TInputEntity update);
+    void BulkUpdate(TEntity update);
 
-        void Delete(TIdType id);
+    void Delete(TIdType id);
 
-        void BulkDelete(IEnumerable<TIdType> ids);
+    void BulkDelete(IEnumerable<TIdType> ids);
 
-        void BulkDelete(IEnumerable<TInputEntity> entities);
+    void BulkDelete(IEnumerable<TEntity> entities);
     }
 }

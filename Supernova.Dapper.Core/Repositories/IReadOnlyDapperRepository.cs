@@ -3,10 +3,9 @@ using Supernova.Dapper.Core.Entities;
 
 namespace Supernova.Dapper.Core.Repositories
 {
-    public interface IReadOnlyDapperRepository<in TIdType, out TResultEntity>
+    public interface IReadOnlyDapperRepository<in TIdType, out TResultEntity> 
+        where TResultEntity : IEntity<TIdType>
     {
-        string TableName { get; set; }
-
         TResultEntity GetById(TIdType id);
 
         IEnumerable<TResultEntity> GetAll();
