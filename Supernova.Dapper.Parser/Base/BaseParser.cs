@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using Dapper;
 using Supernova.Dapper.Core.Attributes;
@@ -32,19 +33,19 @@ namespace Supernova.Dapper.Parser.Base
 
         public abstract ParsedQuery Delete<TEntity>(TIdType id, string seedParameter) where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+        public abstract ParsedQuery Where<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter) where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string parameterSeed) 
+        public abstract ParsedQuery Where<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string parameterSeed) 
             where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+        public abstract ParsedQuery And<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter) where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string parameterSeed) 
+        public abstract ParsedQuery And<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string parameterSeed) 
             where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+        public abstract ParsedQuery Or<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter) where TEntity : IEntity<TIdType>;
 
-        public abstract ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string parameterSeed) 
+        public abstract ParsedQuery Or<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string parameterSeed) 
             where TEntity : IEntity<TIdType>;
 
         public virtual string GetEntityTableName<TEntity>() where TEntity : IEntity<TIdType>

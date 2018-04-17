@@ -27,7 +27,7 @@ namespace Supernova.Dapper.Base
         public virtual TEntity GetById(TIdType id)
         {
             ParsedQuery query = _queryParser.Select<TEntity>();
-            query = _queryParser.Where<TEntity>(query, nameof(IEntity<TIdType>.Id), id);
+            query = _queryParser.Where<TEntity>(query, e => e.Id.Equals(id));
 
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {

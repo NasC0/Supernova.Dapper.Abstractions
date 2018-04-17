@@ -1,4 +1,6 @@
-﻿namespace Supernova.Dapper.Core.Entities
+﻿using System;
+
+namespace Supernova.Dapper.Core.Entities
 {
     public interface IEntity<TIdType>
     {

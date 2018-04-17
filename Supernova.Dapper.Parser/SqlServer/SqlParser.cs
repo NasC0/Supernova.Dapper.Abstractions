@@ -1,20 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 using Dapper;
 using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Parser.Base;
+using Supernova.Dapper.Parser.Core;
 using Supernova.Dapper.Parser.Core.Enums;
 using Supernova.Dapper.Parser.Core.Models;
 
 namespace Supernova.Dapper.Parser.SqlServer
 {
     public class SqlParser<TIdType> : BaseParser<TIdType>
-        where TIdType : new()
     {
         private const string SelectAllColumns = "*";
         private const string WhereFilterKeyword = "WHERE";
         private const string AndFilterKeyword = "AND";
         private const string OrFilterKeyword = "OR";
+
+        protected readonly IQueryTranslator _translator;
+
+        public SqlParser()
+            : this(new SqlServerTranslator())
+        {
+        }
+
+        public SqlParser(IQueryTranslator translator)
+        {
+            _translator = translator;
+        }
 
         public override ParsedQuery Select<TEntity>()
         {
@@ -96,7 +110,7 @@ namespace Supernova.Dapper.Parser.SqlServer
             query.Query = queryBuilder;
             query.Parameters = parameters;
 
-            query = Where<TEntity>(query, nameof(IEntity<TIdType>.Id), entity.Id, seedParameter);
+            query = Where<TEntity>(query, e => e.Id.Equals(entity.Id), seedParameter);
             return query;
         }
 
@@ -107,45 +121,45 @@ namespace Supernova.Dapper.Parser.SqlServer
 
         public override ParsedQuery Delete<TEntity>(TIdType id, string seedParameter)
         {
-            ParsedQuery query = Where<TEntity>(null, nameof(IEntity<TIdType>.Id), id, seedParameter);
+            ParsedQuery query = Where<TEntity>(null, e => e.Id.Equals(id), seedParameter);
             string tableName = GetEntityTableName<TEntity>();
             query.Query.Insert(0, $"DELETE FROM {tableName} ");
 
             return query;
         }
 
-        public override ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value)
+        public override ParsedQuery Where<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter)
         {
-            return Where<TEntity>(query, paramaterNameToFilter, value, string.Empty);
+            return Where(query, filter, string.Empty);
         }
 
-        public override ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string parameterSeed)
+        public override ParsedQuery Where<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string parameterSeed)
         {
-            return ProcessFilter<TEntity>(WhereFilterKeyword, query, paramaterNameToFilter, value, parameterSeed);
+            return ProcessFilter(WhereFilterKeyword, query, filter, parameterSeed);
         }
 
-        public override ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value)
+        public override ParsedQuery And<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter)
         {
-            return And<TEntity>(query, paramaterNameToFilter, value, string.Empty);
+            return And(query, filter, string.Empty);
         }
 
-        public override ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string parameterSeed)
+        public override ParsedQuery And<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string parameterSeed)
         {
-            return ProcessFilter<TEntity>(AndFilterKeyword, query, paramaterNameToFilter, value, parameterSeed);
+            return ProcessFilter(AndFilterKeyword, query, filter, parameterSeed);
         }
 
-        public override ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value)
+        public override ParsedQuery Or<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter)
         {
-            return Or<TEntity>(query, paramaterNameToFilter, value, string.Empty);
+            return Or(query, filter, string.Empty);
         }
 
-        public override ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string parameterSeed)
+        public override ParsedQuery Or<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string parameterSeed)
         {
-            return ProcessFilter<TEntity>(OrFilterKeyword, query, paramaterNameToFilter, value, parameterSeed);
+            return ProcessFilter(OrFilterKeyword, query, filter, parameterSeed);
         }
 
-        protected virtual ParsedQuery ProcessFilter<TEntity>(string filterKeyword, ParsedQuery query, 
-            string paramaterNameToFilter, object value, string parameterSeed)
+        protected virtual ParsedQuery ProcessFilter<TEntity>(string filterKeyword, ParsedQuery query,
+            Expression<Func<TEntity, bool>> filter, string parameterSeed)
             where TEntity : IEntity<TIdType>
         {
             if (query == null)
@@ -153,10 +167,21 @@ namespace Supernova.Dapper.Parser.SqlServer
                 query = new ParsedQuery();
             }
 
-            string columnName = GetColumnNameFromPropertyName<TEntity>(paramaterNameToFilter);
+            query.Query.Append($"{filterKeyword} ");
 
-            query.Query.AppendLine($"{filterKeyword} {columnName} = @{columnName}{parameterSeed}");
-            query.Parameters.Add($"@{columnName}{parameterSeed}", value);
+            TranslatedQuery translatedQuery = _translator.Translate(filter);
+            string columnName = GetColumnNameFromPropertyName<TEntity>(translatedQuery.ParameterName);
+            if (!translatedQuery.IsNullCheck)
+            {
+                query.Query.AppendLine(string.Format(translatedQuery.FilterFormat, columnName,
+                    $"@{columnName}{parameterSeed}"));
+
+                query.Parameters.Add($"@{columnName}{parameterSeed}", translatedQuery.FilterValue);
+            }
+            else
+            {
+                query.Query.AppendLine(string.Format(translatedQuery.FilterFormat, columnName));
+            }
 
             return query;
         }

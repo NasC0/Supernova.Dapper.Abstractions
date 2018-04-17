@@ -1,4 +1,6 @@
-﻿using Supernova.Dapper.Core.Entities;
+﻿using System;
+using System.Linq.Expressions;
+using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Parser.Core.Enums;
 using Supernova.Dapper.Parser.Core.Models;
 
@@ -22,17 +24,17 @@ namespace Supernova.Dapper.Parser.Core
 
         ParsedQuery Delete<TEntity>(TIdType id, string seedParameter) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+        ParsedQuery Where<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string seedParameter) where TEntity : IEntity<TIdType>;
+        ParsedQuery Where<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string seedParameter) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+        ParsedQuery And<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string seedParameter) where TEntity : IEntity<TIdType>;
+        ParsedQuery And<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string seedParameter) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+        ParsedQuery Or<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string seedParameter) where TEntity : IEntity<TIdType>;
+        ParsedQuery Or<TEntity>(ParsedQuery query, Expression<Func<TEntity, bool>> filter, string seedParameter) where TEntity : IEntity<TIdType>;
 
         string GetEntityTableName<TEntity>() where TEntity : IEntity<TIdType>;
 
