@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Supernova.Dapper</id>
+    <version>1.0.0</version>
+    <title>Supernova.Dapper</title>
+    <authors>Atanas Marinov</authors>
+    <owners>Atanas Marinov</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A library which adds abstractions over Dapper for working with Read/Write repositories, as well as parsers for different database servers.</description>
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Dapper" version="1.50.4" />
+        <dependency id="System.Data.SqlClient" version="4.4.3" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src=".\Supernova.Dapper.Parser.Core\bin\Release\netstandard2.0\Supernova.Dapper.Core.dll" 
+		  target="lib\netstandard2.0\Supernova.Dapper.Core.dll" />
+    <file src=".\Supernova.Dapper\bin\Release\netstandard2.0\Supernova.Dapper.dll" target="lib\netstandard2.0\Supernova.Dapper.dll" />
+    <file src=".\Supernova.Dapper.Parser.Core\bin\Release\netstandard2.0\Supernova.Dapper.Parser.Core.dll" 
+		  target="lib\netstandard2.0\Supernova.Dapper.Parser.Core.dll" />
+    <file src=".\Supernova.Dapper.Parser\bin\Release\netstandard2.0\Supernova.Dapper.Parser.dll" 
+		  target="lib\netstandard2.0\Supernova.Dapper.Parser.dll" />
+  </files>
+</package>
