@@ -13,7 +13,7 @@ namespace Supernova.Dapper.Core.Repositories
 
         void Update(TEntity update);
 
-        void BulkUpdate(TEntity update);
+        void BulkUpdate(IEnumerable<TEntity> entities);
 
         void Delete(TIdType id);
 

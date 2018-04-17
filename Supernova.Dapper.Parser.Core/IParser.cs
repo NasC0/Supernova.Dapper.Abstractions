@@ -12,15 +12,27 @@ namespace Supernova.Dapper.Parser.Core
 
         ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey) where TEntity : IEntity<TIdType>;
 
+        ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, string seedParameter) where TEntity : IEntity<TIdType>;
+
         ParsedQuery Update<TEntity>(TEntity entity) where TEntity : IEntity<TIdType>;
+
+        ParsedQuery Update<TEntity>(TEntity entity, string seedParameter) where TEntity : IEntity<TIdType>;
 
         ParsedQuery Delete<TEntity>(TIdType id) where TEntity : IEntity<TIdType>;
 
+        ParsedQuery Delete<TEntity>(TIdType id, string seedParameter) where TEntity : IEntity<TIdType>;
+
         ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+
+        ParsedQuery Where<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string seedParameter) where TEntity : IEntity<TIdType>;
 
         ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
 
+        ParsedQuery And<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string seedParameter) where TEntity : IEntity<TIdType>;
+
         ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value) where TEntity : IEntity<TIdType>;
+
+        ParsedQuery Or<TEntity>(ParsedQuery query, string paramaterNameToFilter, object value, string seedParameter) where TEntity : IEntity<TIdType>;
 
         string GetEntityTableName<TEntity>() where TEntity : IEntity<TIdType>;
 

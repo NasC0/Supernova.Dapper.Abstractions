@@ -34,15 +34,28 @@ namespace Supernova.Dapper.ConsoleTests
                     TextField = "this is the end, my beautiful friend, the end"
                 };
 
-                var allEntities = repository.GetAll();
-                repository.Insert(entity);
+                var allEntities = repository
+                    .GetAll()
+                    .ToList();
 
-                var currentEntity = repository.GetById(3);
-                currentEntity.TextField = "teehee";
+                allEntities[5].TextField = "this is";
+                allEntities[6].TextField = "impossibru!";
 
-                repository.Update(currentEntity);
+                repository.BulkUpdate(allEntities);
 
-                repository.Delete(3);
+                repository.BulkDelete(new List<int>
+                {
+                    9,
+                    10
+                });
+
+                List<TestEntity> entitiesToDelete = new List<TestEntity>
+                {
+                    allEntities[12],
+                    allEntities[13]
+                };
+
+                repository.BulkDelete(entitiesToDelete);
             }
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Supernova.Dapper.Parser.Core.Enums
+﻿namespace Supernova.Dapper.Parser.Core.Enums
 {
     public enum ColumnTypes
     {

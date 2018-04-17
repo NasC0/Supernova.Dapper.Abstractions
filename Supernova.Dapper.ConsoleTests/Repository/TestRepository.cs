@@ -13,25 +13,5 @@ namespace Supernova.Dapper.ConsoleTests.Repository
             : base(connectionFactory, queryParser)
         {
         }
-
-        public override void BulkInsert(IEnumerable<TestEntity> entities)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void BulkUpdate(TestEntity update)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void BulkDelete(IEnumerable<int> ids)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void BulkDelete(IEnumerable<TestEntity> entities)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

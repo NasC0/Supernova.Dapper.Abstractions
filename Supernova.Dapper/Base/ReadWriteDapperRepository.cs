@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Text;
 using Dapper;
 using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Core.Factories;
@@ -28,7 +30,25 @@ namespace Supernova.Dapper.Base
             }
         }
 
-        public abstract void BulkInsert(IEnumerable<TEntity> entities);
+        public virtual void BulkInsert(IEnumerable<TEntity> entities)
+        {
+            StringBuilder bulkQuery = new StringBuilder();
+            DynamicParameters bulkParameters = new DynamicParameters();
+
+            int insertCount = 1;
+            foreach (TEntity entity in entities)
+            {
+                ParsedQuery query = _queryParser.Insert(entity, false, insertCount.ToString());
+                bulkQuery.Append(query.Query);
+                bulkParameters.AddDynamicParams(query.Parameters);
+                insertCount++;
+            }
+
+            using (IDbConnection connection = _connectionFactory.GetConnection())
+            {
+                connection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+            }
+        }
 
         public virtual void Update(TEntity update)
         {
@@ -39,7 +59,25 @@ namespace Supernova.Dapper.Base
             }
         }
 
-        public abstract void BulkUpdate(TEntity update);
+        public virtual void BulkUpdate(IEnumerable<TEntity> entities)
+        {
+            StringBuilder bulkQuery = new StringBuilder();
+            DynamicParameters bulkParameters = new DynamicParameters();
+
+            int insertCount = 1;
+            foreach (TEntity entity in entities)
+            {
+                ParsedQuery query = _queryParser.Update(entity, insertCount.ToString());
+                bulkQuery.Append(query.Query);
+                bulkParameters.AddDynamicParams(query.Parameters);
+                insertCount++;
+            }
+
+            using (IDbConnection connection = _connectionFactory.GetConnection())
+            {
+                connection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+            }
+        }
 
         public virtual void Delete(TIdType id)
         {
@@ -50,8 +88,33 @@ namespace Supernova.Dapper.Base
             }
         }
 
-        public abstract void BulkDelete(IEnumerable<TIdType> ids);
+        public virtual void BulkDelete(IEnumerable<TIdType> ids)
+        {
+            StringBuilder bulkQuery = new StringBuilder();
+            DynamicParameters bulkParameters = new DynamicParameters();
 
-        public abstract void BulkDelete(IEnumerable<TEntity> entities);
+            int insertCount = 1;
+            foreach (TIdType id in ids)
+            {
+                ParsedQuery query = _queryParser.Delete<TEntity>(id, insertCount.ToString());
+                bulkQuery.Append(query.Query);
+                bulkParameters.AddDynamicParams(query.Parameters);
+                insertCount++;
+            }
+
+            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+            {
+                sqlConnection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+            }
+        }
+
+        public virtual void BulkDelete(IEnumerable<TEntity> entities)
+        {
+            List<TIdType> entityIds = entities
+                .Select(e => e.Id)
+                .ToList();
+
+            BulkDelete(entityIds);
+        }
     }
 }

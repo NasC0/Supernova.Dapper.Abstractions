@@ -14,7 +14,7 @@ namespace Supernova.Dapper.Initialization
             List<Type> typesInNamespaces = ExtractTypes(namespacesToScan);
             IDictionary<Type, CustomPropertyTypeMap> typeMaps = GetCustomTypeMaps(typesInNamespaces);
 
-            foreach (var typeMap in typeMaps)
+            foreach (KeyValuePair<Type, CustomPropertyTypeMap> typeMap in typeMaps)
             {
                 SqlMapper.SetTypeMap(typeMap.Key, typeMap.Value);
             }
