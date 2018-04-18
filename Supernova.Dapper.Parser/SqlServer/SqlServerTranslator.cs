@@ -8,6 +8,8 @@ using Supernova.Dapper.Parser.Core.Models;
 
 namespace Supernova.Dapper.Parser.SqlServer
 {
+    // TODO: Refactor galore
+    // !!HERE BE DRAGONS!!
     public class SqlServerTranslator : ExpressionVisitor, IQueryTranslator
     {
         private const string InitialFormat = " {0} ";
@@ -19,7 +21,10 @@ namespace Supernova.Dapper.Parser.SqlServer
         private bool _isNullCheck;
 
         private string _parameterName;
-    
+
+        private string _operand;
+
+        private bool _notFlag;
 
         public TranslatedQuery Translate(Expression expression)
         {
@@ -36,7 +41,17 @@ namespace Supernova.Dapper.Parser.SqlServer
                 IsNullCheck = _isNullCheck
             };
 
+            CleanUp();
             return query;
+        }
+
+        private void CleanUp()
+        {
+            _parameterName = string.Empty;
+            _filterValue = null;
+            _isNullCheck = default(bool);
+            _operand = string.Empty;
+            _notFlag = default(bool);
         }
 
         private static Expression StripQuotes(Expression e)
@@ -54,8 +69,14 @@ namespace Supernova.Dapper.Parser.SqlServer
             if (m.Method.Name == "Equals")
             {
                 _parameterName = ((MemberExpression) m.Object).Member.Name;
-                _currentFormat.Append("=");
                 VisitExpressionList(m.Arguments);
+                ExpressionType comparisonFlag = ExpressionType.Equal;
+                if (_notFlag)
+                {
+                    comparisonFlag = ExpressionType.NotEqual;
+                }
+
+                CompileExpression(comparisonFlag, _isNullCheck);
                 return m;
             }
 
@@ -98,7 +119,7 @@ namespace Supernova.Dapper.Parser.SqlServer
             switch (u.NodeType)
             {
                 case ExpressionType.Not:
-                    _currentFormat.Append(" NOT ");
+                    _notFlag = true;
                     Visit(u.Operand);
                     break;
                 default:
@@ -106,40 +127,13 @@ namespace Supernova.Dapper.Parser.SqlServer
             }
             return u;
         }
+
         protected override Expression VisitBinary(BinaryExpression b)
         {
             Visit(b.Left);
-            switch (b.NodeType)
-            {
-                case ExpressionType.And:
-                    _currentFormat.Append(" AND ");
-                    break;
-                case ExpressionType.Or:
-                    _currentFormat.Append(" OR");
-                    break;
-                case ExpressionType.Equal:
-                    _currentFormat.Append(" = ");
-                    break;
-                case ExpressionType.NotEqual:
-                    _currentFormat.Append(" <> ");
-                    break;
-                case ExpressionType.LessThan:
-                    _currentFormat.Append(" < ");
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    _currentFormat.Append(" <= ");
-                    break;
-                case ExpressionType.GreaterThan:
-                    _currentFormat.Append(" > ");
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    _currentFormat.Append(" >= ");
-                    break;
-                default:
-                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
-            }
-
             Visit(b.Right);
+
+            CompileExpression(b.NodeType, _isNullCheck);
             return b;
         }
 
@@ -147,7 +141,7 @@ namespace Supernova.Dapper.Parser.SqlServer
         {
             if (c.Value == null)
             {
-                _currentFormat.Append("NULL");
+                _operand = "NULL";
                 _isNullCheck = true;
             }
             else
@@ -155,10 +149,10 @@ namespace Supernova.Dapper.Parser.SqlServer
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        _currentFormat.Append(((bool)c.Value) ? 1 : 0);
+                        _operand = (((bool)c.Value) ? 1 : 0).ToString();
                         break;
                     case TypeCode.String:
-                        _currentFormat.Append(" {1}");
+                        _operand = "{1}";
                         _filterValue = c.Value;
                         break;
                     case TypeCode.Object:
@@ -166,7 +160,8 @@ namespace Supernova.Dapper.Parser.SqlServer
                         //throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
                         break;
                     default:
-                        _currentFormat.Append(c.Value);
+                        _operand = "{1}";
+                        _filterValue = c.Value;
                         break;
                 }
             }
@@ -181,9 +176,18 @@ namespace Supernova.Dapper.Parser.SqlServer
                 try
                 {
                     object value = GetMemberExpressionValue(m);
+                    if (value is null)
+                    {
+                        throw new ArgumentNullException(m.Member.Name, "Value must be initialized.");
+                    }
+
                     _filterValue = value;
-                    _currentFormat.Append(" {1}");
+                    _operand = "{1}";
                     return m;
+                }
+                catch (ArgumentNullException)
+                {
+                    throw;
                 }
                 catch (Exception)
                 {
@@ -208,6 +212,45 @@ namespace Supernova.Dapper.Parser.SqlServer
             object value = getter.Invoke();
 
             return value;
+        }
+
+        protected virtual void DetermineComparisonOperator(ExpressionType nodeType, bool valueIsNull)
+        {
+            switch (nodeType)
+            {
+                case ExpressionType.And:
+                    _currentFormat.Append(" AND ");
+                    break;
+                case ExpressionType.Or:
+                    _currentFormat.Append(" OR ");
+                    break;
+                case ExpressionType.Equal:
+                    _currentFormat.Append(valueIsNull ? " IS " : " = ");
+                    break;
+                case ExpressionType.NotEqual:
+                    _currentFormat.Append(valueIsNull ? " IS NOT " : " <> ");
+                    break;
+                case ExpressionType.LessThan:
+                    _currentFormat.Append(" < ");
+                    break;
+                case ExpressionType.LessThanOrEqual:
+                    _currentFormat.Append(" <= ");
+                    break;
+                case ExpressionType.GreaterThan:
+                    _currentFormat.Append(" > ");
+                    break;
+                case ExpressionType.GreaterThanOrEqual:
+                    _currentFormat.Append(" >= ");
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", nodeType));
+            }
+        }
+
+        protected virtual void CompileExpression(ExpressionType nodeType, bool valueIsNull)
+        {
+            DetermineComparisonOperator(nodeType, valueIsNull);
+            _currentFormat.Append(_operand);
         }
     }
 }
