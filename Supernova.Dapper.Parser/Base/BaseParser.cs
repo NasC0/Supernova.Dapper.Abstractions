@@ -5,8 +5,8 @@ using System.Reflection;
 using Dapper;
 using Supernova.Dapper.Core.Attributes;
 using Supernova.Dapper.Core.Entities;
+using Supernova.Dapper.Core.Enums;
 using Supernova.Dapper.Parser.Core;
-using Supernova.Dapper.Parser.Core.Enums;
 using Supernova.Dapper.Parser.Core.Models;
 
 namespace Supernova.Dapper.Parser.Base

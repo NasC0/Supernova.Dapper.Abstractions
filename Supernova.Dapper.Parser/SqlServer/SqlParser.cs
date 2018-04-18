@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using System.Text;
 using Dapper;
 using Supernova.Dapper.Core.Entities;
+using Supernova.Dapper.Core.Enums;
 using Supernova.Dapper.Parser.Base;
 using Supernova.Dapper.Parser.Core;
-using Supernova.Dapper.Parser.Core.Enums;
 using Supernova.Dapper.Parser.Core.Models;
 
 namespace Supernova.Dapper.Parser.SqlServer

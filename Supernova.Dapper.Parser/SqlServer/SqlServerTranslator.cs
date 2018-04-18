@@ -122,6 +122,9 @@ namespace Supernova.Dapper.Parser.SqlServer
                     _notFlag = true;
                     Visit(u.Operand);
                     break;
+                case ExpressionType.Convert:
+                    Visit(u.Operand);
+                    break;
                 default:
                     throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
             }
