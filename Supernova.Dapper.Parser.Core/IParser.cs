@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Supernova.Dapper.Core.Entities;
-using Supernova.Dapper.Parser.Core.Enums;
+using Supernova.Dapper.Core.Enums;
 using Supernova.Dapper.Parser.Core.Models;
 
 namespace Supernova.Dapper.Parser.Core

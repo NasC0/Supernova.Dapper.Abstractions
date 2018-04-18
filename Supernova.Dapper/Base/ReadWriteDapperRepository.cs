@@ -67,7 +67,8 @@ namespace Supernova.Dapper.Base
             int insertCount = 1;
             foreach (TEntity entity in entities)
             {
-                ParsedQuery query = _queryParser.Update(entity, insertCount.ToString());
+                ParsedQuery query = _queryParser
+                    .Update(entity, insertCount.ToString());
                 bulkQuery.Append(query.Query);
                 bulkParameters.AddDynamicParams(query.Parameters);
                 insertCount++;

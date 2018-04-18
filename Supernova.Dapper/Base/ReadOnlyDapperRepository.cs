@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using Supernova.Dapper.Core.Entities;
+using Supernova.Dapper.Core.Enums;
 using Supernova.Dapper.Core.Factories;
 using Supernova.Dapper.Core.Repositories;
 using Supernova.Dapper.Parser.Core;
@@ -39,7 +40,12 @@ namespace Supernova.Dapper.Base
 
         public virtual IEnumerable<TEntity> GetAll()
         {
-            ParsedQuery query = _queryParser.Select<TEntity>();
+            return GetAll(ColumnTypes.All);
+        }
+
+        public virtual IEnumerable<TEntity> GetAll(ColumnTypes columns)
+        {
+            ParsedQuery query = _queryParser.Select<TEntity>(columns);
 
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {

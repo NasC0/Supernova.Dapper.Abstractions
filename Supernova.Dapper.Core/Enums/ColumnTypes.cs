@@ -1,4 +1,4 @@
-﻿namespace Supernova.Dapper.Parser.Core.Enums
+﻿namespace Supernova.Dapper.Core.Enums
 {
     public enum ColumnTypes
     {
