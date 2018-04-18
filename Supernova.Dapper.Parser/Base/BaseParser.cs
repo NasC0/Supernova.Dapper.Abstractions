@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Dapper;
 using Supernova.Dapper.Core.Attributes;
 using Supernova.Dapper.Core.Entities;
 using Supernova.Dapper.Core.Enums;
+using Supernova.Dapper.Core.Extensions;
 using Supernova.Dapper.Parser.Core;
 using Supernova.Dapper.Parser.Core.Models;
 
@@ -18,16 +20,30 @@ namespace Supernova.Dapper.Parser.Base
         public abstract ParsedQuery Select<TEntity>() where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Select<TEntity>(ColumnTypes columns) where TEntity : IEntity<TIdType>;
+
+        public abstract ParsedQuery Insert<TEntity>(TEntity entity)
+            where TEntity : IEntity<TIdType>;
         
         public abstract ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey) 
+            where TEntity : IEntity<TIdType>;
+        
+        public abstract ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, params string[] ignoreColumns)
             where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, string seedParameter) 
             where TEntity : IEntity<TIdType>;
 
+        public abstract ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, string seedParameter, params string[] ignoreColumns)
+            where TEntity : IEntity<TIdType>;
+
         public abstract ParsedQuery Update<TEntity>(TEntity entity) where TEntity : IEntity<TIdType>;
 
+        public abstract ParsedQuery Update<TEntity>(TEntity entity, params string[] ignoreColumns) where TEntity : IEntity<TIdType>;
+
         public abstract ParsedQuery Update<TEntity>(TEntity entity, string seedParameter) where TEntity : IEntity<TIdType>;
+
+        public abstract ParsedQuery Update<TEntity>(TEntity entity, string seedParameter, params string[] ignoreColumns) 
+            where TEntity : IEntity<TIdType>;
 
         public abstract ParsedQuery Delete<TEntity>(TIdType id) where TEntity : IEntity<TIdType>;
 
@@ -84,13 +100,22 @@ namespace Supernova.Dapper.Parser.Base
         protected virtual IEnumerable<string> GetEntityColumnNames<TEntity>(bool includePrimaryKey)
             where TEntity : IEntity<TIdType>
         {
+            return GetEntityColumnNames<TEntity>(includePrimaryKey, Enumerable.Empty<string>());
+        }
+
+        protected virtual IEnumerable<string> GetEntityColumnNames<TEntity>(bool includePrimaryKey,
+            IEnumerable<string> ignoreColumns)
+            where TEntity : IEntity<TIdType>
+        {
+            HashSet<string> columnSet = ignoreColumns.ToHashSet();
             Type entityType = typeof(TEntity);
             IEnumerable<PropertyInfo> entityProperties = entityType.GetRuntimeProperties();
             List<string> columnNames = new List<string>();
             foreach (PropertyInfo property in entityProperties)
             {
+                bool ignoreColumn = columnSet.Contains(property.Name);
                 string columnName = GetColumnNameFromProperty(property, includePrimaryKey);
-                if (!string.IsNullOrWhiteSpace(columnName))
+                if (!string.IsNullOrWhiteSpace(columnName) && !ignoreColumn)
                 {
                     columnNames.Add(columnName);
                 }
@@ -128,13 +153,22 @@ namespace Supernova.Dapper.Parser.Base
         protected virtual DynamicParameters GetEntityParameters<TEntity>(TEntity entity, bool includePrimaryKey, string parameterKeySeed)
             where TEntity : IEntity<TIdType>
         {
+            return GetEntityParameters(entity, includePrimaryKey, 
+                parameterKeySeed, Enumerable.Empty<string>());
+        }
+
+        protected virtual DynamicParameters GetEntityParameters<TEntity>(TEntity entity, bool includePrimaryKey, string parameterKeySeed, IEnumerable<string> ignoreColumns)
+            where TEntity : IEntity<TIdType>
+        {
+            HashSet<string> columnSet = ignoreColumns.ToHashSet();
             Type entityType = entity.GetType();
             DynamicParameters parameters = new DynamicParameters();
             PropertyInfo[] properties = entityType.GetProperties();
             foreach (PropertyInfo property in properties)
             {
+                bool ignoreColumn = columnSet.Contains(property.Name);
                 string columnName = GetColumnNameFromProperty(property, includePrimaryKey);
-                if (!string.IsNullOrWhiteSpace(columnName))
+                if (!string.IsNullOrWhiteSpace(columnName) && !ignoreColumn)
                 {
                     string parameter = string.Format("@{0}{1}", columnName, parameterKeySeed);
                     parameters.Add(parameter, property.GetValue(entity));

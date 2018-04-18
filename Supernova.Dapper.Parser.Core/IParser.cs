@@ -12,13 +12,28 @@ namespace Supernova.Dapper.Parser.Core
 
         ParsedQuery Select<TEntity>(ColumnTypes columns) where TEntity : IEntity<TIdType>;
 
+        ParsedQuery Insert<TEntity>(TEntity entity)
+            where TEntity : IEntity<TIdType>;
+
         ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey) where TEntity : IEntity<TIdType>;
 
-        ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, string seedParameter) where TEntity : IEntity<TIdType>;
+        ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, params string[] ignoreColumns) 
+            where TEntity : IEntity<TIdType>;
+
+        ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, string seedParameter) 
+            where TEntity : IEntity<TIdType>;
+
+        ParsedQuery Insert<TEntity>(TEntity entity, bool includePrimaryKey, string seedParameter, params string[] ignoreColumns)
+            where TEntity : IEntity<TIdType>;
 
         ParsedQuery Update<TEntity>(TEntity entity) where TEntity : IEntity<TIdType>;
 
+        ParsedQuery Update<TEntity>(TEntity entity, params string[] ignoreColumns) where TEntity : IEntity<TIdType>;
+
         ParsedQuery Update<TEntity>(TEntity entity, string seedParameter) where TEntity : IEntity<TIdType>;
+
+        ParsedQuery Update<TEntity>(TEntity entity, string seedParameter, params string[] ignoreColumns) 
+            where TEntity : IEntity<TIdType>;
 
         ParsedQuery Delete<TEntity>(TIdType id) where TEntity : IEntity<TIdType>;
 

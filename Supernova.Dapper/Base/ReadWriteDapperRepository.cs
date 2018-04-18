@@ -23,7 +23,12 @@ namespace Supernova.Dapper.Base
 
         public virtual void Insert(TEntity entity)
         {
-            ParsedQuery query = _queryParser.Insert(entity, false);
+            Insert(entity, new string[0]);
+        }
+
+        public virtual void Insert(TEntity entity, params string[] ignoreColumns)
+        {
+            ParsedQuery query = _queryParser.Insert(entity, false, ignoreColumns);
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {
                 sqlConnection.Query(query.Query.ToString(), query.Parameters);
@@ -32,13 +37,18 @@ namespace Supernova.Dapper.Base
 
         public virtual void BulkInsert(IEnumerable<TEntity> entities)
         {
+            BulkInsert(entities, new string[0]);
+        }
+
+        public virtual void BulkInsert(IEnumerable<TEntity> entities, params string[] ignoreColumns)
+        {
             StringBuilder bulkQuery = new StringBuilder();
             DynamicParameters bulkParameters = new DynamicParameters();
 
             int insertCount = 1;
             foreach (TEntity entity in entities)
             {
-                ParsedQuery query = _queryParser.Insert(entity, false, insertCount.ToString());
+                ParsedQuery query = _queryParser.Insert(entity, false, insertCount.ToString(), ignoreColumns);
                 bulkQuery.Append(query.Query);
                 bulkParameters.AddDynamicParams(query.Parameters);
                 insertCount++;
@@ -52,7 +62,12 @@ namespace Supernova.Dapper.Base
 
         public virtual void Update(TEntity update)
         {
-            ParsedQuery query = _queryParser.Update(update);
+            Update(update, new string[0]);
+        }
+
+        public virtual void Update(TEntity update, params string[] ignoreColumns)
+        {
+            ParsedQuery query = _queryParser.Update(update, ignoreColumns);
             using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
             {
                 sqlConnection.Query(query.Query.ToString(), query.Parameters);
@@ -61,6 +76,11 @@ namespace Supernova.Dapper.Base
 
         public virtual void BulkUpdate(IEnumerable<TEntity> entities)
         {
+            BulkUpdate(entities, new string[0]);
+        }
+
+        public virtual void BulkUpdate(IEnumerable<TEntity> entities, params string[] ignoreColumns)
+        {
             StringBuilder bulkQuery = new StringBuilder();
             DynamicParameters bulkParameters = new DynamicParameters();
 
@@ -68,7 +88,7 @@ namespace Supernova.Dapper.Base
             foreach (TEntity entity in entities)
             {
                 ParsedQuery query = _queryParser
-                    .Update(entity, insertCount.ToString());
+                    .Update(entity, insertCount.ToString(), ignoreColumns);
                 bulkQuery.Append(query.Query);
                 bulkParameters.AddDynamicParams(query.Parameters);
                 insertCount++;

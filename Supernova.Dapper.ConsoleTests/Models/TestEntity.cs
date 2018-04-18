@@ -15,7 +15,7 @@ namespace Supernova.Dapper.ConsoleTests.Models
         [Column("DateTimeField")]
         public DateTime SomeDateTimeField { get; set; }
 
-        [Column("MuchoGuid")]
+        [Column("GuidField")]
         public Guid SomeGuidField { get; set; }
     }
 }

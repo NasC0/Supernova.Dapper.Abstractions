@@ -23,9 +23,14 @@ namespace Supernova.Dapper.ConsoleTests
 
         public static void Main()
         {
+            List<string> list = new List<string>();
+            Console.WriteLine(list.Contains("teehee"));
+
+
             DapperStartupMapping.RegisterCustomMaps("Supernova.Dapper.ConsoleTests.Models");
             IConnectionFactory connectionFactory = new ConnectionFactory("DefaultConnection");
             IParser<int> parser = new SqlParser<int>();
+            TestRepository repository = new TestRepository(connectionFactory, parser);
 
             using (IDbConnection connection = connectionFactory.GetConnection())
             {
@@ -36,35 +41,26 @@ namespace Supernova.Dapper.ConsoleTests
                     .ToList();
                 Console.WriteLine(result.Count);
 
-                //TestEntity entity = new TestEntity
-                //{
-                //    SomeDateTimeField = DateTime.Now,
-                //    SomeGuidField = Guid.NewGuid(),
-                //    TextField = "this is the end, my beautiful friend, the end"
-                //};
+                TestEntity entity = new TestEntity
+                {
+                    SomeDateTimeField = DateTime.Now,
+                    SomeGuidField = Guid.NewGuid(),
+                    TextField = "this is the end, my beautiful friend, the end"
+                };
 
-                //var allEntities = repository
-                //    .GetAll()
-                //    .ToList();
+                repository.Insert(entity);
 
-                //allEntities[5].TextField = "this is";
-                //allEntities[6].TextField = "impossibru!";
+                var allEntities = repository
+                    .GetAll()
+                    .ToList();
 
-                //repository.BulkUpdate(allEntities);
+                foreach (TestEntity testEntity in allEntities)
+                {
+                    testEntity.TextField = "teehee";
+                    testEntity.SomeDateTimeField = new DateTime(2010, 2, 2);
+                }
 
-                //repository.BulkDelete(new List<int>
-                //{
-                //    9,
-                //    10
-                //});
-
-                //List<TestEntity> entitiesToDelete = new List<TestEntity>
-                //{
-                //    allEntities[12],
-                //    allEntities[13]
-                //};
-
-                //repository.BulkDelete(entitiesToDelete);
+                repository.BulkUpdate(allEntities, nameof(TestEntity.SomeDateTimeField));
             }
         }
     }
