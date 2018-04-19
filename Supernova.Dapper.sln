@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2015
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{068DBA69-2A6C-4098-AB70-9E2908B5ACA9}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,6 +18,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Supernova.Dapper.Parser.Core", "Supernova.Dapper.Parser.Core\Supernova.Dapper.Parser.Core.csproj", "{07CF0B39-B740-42D4-B813-E23AEDFA16FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Supernova.Dapper.ConsoleTests", "Supernova.Dapper.ConsoleTests\Supernova.Dapper.ConsoleTests.csproj", "{0C782F38-A8DC-4AAA-BD42-1B8DBDAA92C1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy", "Legacy", "{75ED4FFE-F8AD-4497-BAE1-94A47C843A02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Supernova.Dapper", "Legacy\Supernova.Dapper\Supernova.Dapper.csproj", "{EF4EDA86-430C-4C3D-A905-038962059043}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Supernova.Dapper.Core", "Legacy\Supernova.Dapper.Core\Supernova.Dapper.Core.csproj", "{794C2543-B205-4644-A08D-C788F41996D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Supernova.Dapper.Parser.Core", "Legacy\Supernova.Dapper.Parser.Core\Supernova.Dapper.Parser.Core.csproj", "{D27EEF86-04B6-4C8C-A007-96D6E5C10531}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Supernova.Dapper.Parser", "Legacy\Supernova.Dapper.Parser\Supernova.Dapper.Parser.csproj", "{57B3639E-C012-4070-B017-4D224C211C0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,9 +55,31 @@ Global
 		{0C782F38-A8DC-4AAA-BD42-1B8DBDAA92C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C782F38-A8DC-4AAA-BD42-1B8DBDAA92C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C782F38-A8DC-4AAA-BD42-1B8DBDAA92C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF4EDA86-430C-4C3D-A905-038962059043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF4EDA86-430C-4C3D-A905-038962059043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF4EDA86-430C-4C3D-A905-038962059043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF4EDA86-430C-4C3D-A905-038962059043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{794C2543-B205-4644-A08D-C788F41996D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{794C2543-B205-4644-A08D-C788F41996D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{794C2543-B205-4644-A08D-C788F41996D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{794C2543-B205-4644-A08D-C788F41996D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D27EEF86-04B6-4C8C-A007-96D6E5C10531}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D27EEF86-04B6-4C8C-A007-96D6E5C10531}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D27EEF86-04B6-4C8C-A007-96D6E5C10531}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D27EEF86-04B6-4C8C-A007-96D6E5C10531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57B3639E-C012-4070-B017-4D224C211C0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57B3639E-C012-4070-B017-4D224C211C0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57B3639E-C012-4070-B017-4D224C211C0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57B3639E-C012-4070-B017-4D224C211C0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EF4EDA86-430C-4C3D-A905-038962059043} = {75ED4FFE-F8AD-4497-BAE1-94A47C843A02}
+		{794C2543-B205-4644-A08D-C788F41996D9} = {75ED4FFE-F8AD-4497-BAE1-94A47C843A02}
+		{D27EEF86-04B6-4C8C-A007-96D6E5C10531} = {75ED4FFE-F8AD-4497-BAE1-94A47C843A02}
+		{57B3639E-C012-4070-B017-4D224C211C0E} = {75ED4FFE-F8AD-4497-BAE1-94A47C843A02}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AAEC484A-F264-48E9-BF1E-9B2FEFB0BE0D}
