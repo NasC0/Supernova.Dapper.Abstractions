@@ -27,15 +27,20 @@ namespace Supernova.Dapper.Base
 
         public virtual TEntity GetById(TIdType id)
         {
-            ParsedQuery query = _queryParser.Select<TEntity>();
-            query = _queryParser.Where<TEntity>(query, e => e.Id.Equals(id));
-
-            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+            if (id != null)
             {
-                return sqlConnection
-                    .Query<TEntity>(query.Query.ToString(), query.Parameters)
-                    .FirstOrDefault();
+                ParsedQuery query = _queryParser.Select<TEntity>();
+                query = _queryParser.Where<TEntity>(query, e => e.Id.Equals(id));
+
+                using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+                {
+                    return sqlConnection
+                        .Query<TEntity>(query.Query.ToString(), query.Parameters)
+                        .FirstOrDefault();
+                }
             }
+
+            return default(TEntity);
         }
 
         public virtual IEnumerable<TEntity> GetAll()

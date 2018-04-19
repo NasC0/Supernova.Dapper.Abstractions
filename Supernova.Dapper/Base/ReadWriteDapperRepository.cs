@@ -28,10 +28,13 @@ namespace Supernova.Dapper.Base
 
         public virtual void Insert(TEntity entity, params string[] ignoreColumns)
         {
-            ParsedQuery query = _queryParser.Insert(entity, false, ignoreColumns);
-            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+            if (entity != null)
             {
-                sqlConnection.Query(query.Query.ToString(), query.Parameters);
+                ParsedQuery query = _queryParser.Insert(entity, false, ignoreColumns);
+                using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+                {
+                    sqlConnection.Query(query.Query.ToString(), query.Parameters);
+                }
             }
         }
 
@@ -42,21 +45,25 @@ namespace Supernova.Dapper.Base
 
         public virtual void BulkInsert(IEnumerable<TEntity> entities, params string[] ignoreColumns)
         {
-            StringBuilder bulkQuery = new StringBuilder();
-            DynamicParameters bulkParameters = new DynamicParameters();
-
-            int insertCount = 1;
-            foreach (TEntity entity in entities)
+            List<TEntity> enumeratedEntities = entities.ToList();
+            if (enumeratedEntities != null && enumeratedEntities.Any())
             {
-                ParsedQuery query = _queryParser.Insert(entity, false, insertCount.ToString(), ignoreColumns);
-                bulkQuery.Append(query.Query);
-                bulkParameters.AddDynamicParams(query.Parameters);
-                insertCount++;
-            }
+                StringBuilder bulkQuery = new StringBuilder();
+                DynamicParameters bulkParameters = new DynamicParameters();
 
-            using (IDbConnection connection = _connectionFactory.GetConnection())
-            {
-                connection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+                int insertCount = 1;
+                foreach (TEntity entity in enumeratedEntities)
+                {
+                    ParsedQuery query = _queryParser.Insert(entity, false, insertCount.ToString(), ignoreColumns);
+                    bulkQuery.Append(query.Query);
+                    bulkParameters.AddDynamicParams(query.Parameters);
+                    insertCount++;
+                }
+
+                using (IDbConnection connection = _connectionFactory.GetConnection())
+                {
+                    connection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+                }
             }
         }
 
@@ -67,10 +74,13 @@ namespace Supernova.Dapper.Base
 
         public virtual void Update(TEntity update, params string[] ignoreColumns)
         {
-            ParsedQuery query = _queryParser.Update(update, ignoreColumns);
-            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+            if (update != null)
             {
-                sqlConnection.Query(query.Query.ToString(), query.Parameters);
+                ParsedQuery query = _queryParser.Update(update, ignoreColumns);
+                using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+                {
+                    sqlConnection.Query(query.Query.ToString(), query.Parameters);
+                }
             }
         }
 
@@ -81,22 +91,26 @@ namespace Supernova.Dapper.Base
 
         public virtual void BulkUpdate(IEnumerable<TEntity> entities, params string[] ignoreColumns)
         {
-            StringBuilder bulkQuery = new StringBuilder();
-            DynamicParameters bulkParameters = new DynamicParameters();
-
-            int insertCount = 1;
-            foreach (TEntity entity in entities)
+            List<TEntity> enumeratedEntities = entities.ToList();
+            if (enumeratedEntities != null && enumeratedEntities.Any())
             {
-                ParsedQuery query = _queryParser
-                    .Update(entity, insertCount.ToString(), ignoreColumns);
-                bulkQuery.Append(query.Query);
-                bulkParameters.AddDynamicParams(query.Parameters);
-                insertCount++;
-            }
+                StringBuilder bulkQuery = new StringBuilder();
+                DynamicParameters bulkParameters = new DynamicParameters();
 
-            using (IDbConnection connection = _connectionFactory.GetConnection())
-            {
-                connection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+                int insertCount = 1;
+                foreach (TEntity entity in enumeratedEntities)
+                {
+                    ParsedQuery query = _queryParser
+                        .Update(entity, insertCount.ToString(), ignoreColumns);
+                    bulkQuery.Append(query.Query);
+                    bulkParameters.AddDynamicParams(query.Parameters);
+                    insertCount++;
+                }
+
+                using (IDbConnection connection = _connectionFactory.GetConnection())
+                {
+                    connection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+                }
             }
         }
 
@@ -111,21 +125,25 @@ namespace Supernova.Dapper.Base
 
         public virtual void BulkDelete(IEnumerable<TIdType> ids)
         {
-            StringBuilder bulkQuery = new StringBuilder();
-            DynamicParameters bulkParameters = new DynamicParameters();
-
-            int insertCount = 1;
-            foreach (TIdType id in ids)
+            List<TIdType> enumeratedIds = ids.ToList();
+            if (enumeratedIds != null && enumeratedIds.Any())
             {
-                ParsedQuery query = _queryParser.Delete<TEntity>(id, insertCount.ToString());
-                bulkQuery.Append(query.Query);
-                bulkParameters.AddDynamicParams(query.Parameters);
-                insertCount++;
-            }
+                StringBuilder bulkQuery = new StringBuilder();
+                DynamicParameters bulkParameters = new DynamicParameters();
 
-            using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
-            {
-                sqlConnection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+                int insertCount = 1;
+                foreach (TIdType id in enumeratedIds)
+                {
+                    ParsedQuery query = _queryParser.Delete<TEntity>(id, insertCount.ToString());
+                    bulkQuery.Append(query.Query);
+                    bulkParameters.AddDynamicParams(query.Parameters);
+                    insertCount++;
+                }
+
+                using (IDbConnection sqlConnection = _connectionFactory.GetConnection())
+                {
+                    sqlConnection.Query<TEntity>(bulkQuery.ToString(), bulkParameters);
+                }
             }
         }
 

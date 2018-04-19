@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
+using Newtonsoft.Json.Linq;
 using Supernova.Dapper.ConsoleTests.Models;
 using Supernova.Dapper.ConsoleTests.Repository;
 using Supernova.Dapper.Core.Factories;
@@ -16,17 +17,65 @@ namespace Supernova.Dapper.ConsoleTests
 {
     public class Program
     {
-        private static string GetSomeValue()
+        public const int ReadBatchSize = 1000;
+        public const int WriteBatchSize = 100;
+
+        private static readonly INotificationRepository _notificationRepository = InitializeRepository();
+
+        private static INotificationRepository InitializeRepository()
         {
-            return "teehee";
+            DapperStartupMapping.RegisterCustomMaps("CrmBackend.UtilityTools.MigrateNotifications.Models");
+            IConnectionFactory factory = new ConnectionFactory("CrmConnection");
+            IParser<int> parser = new SqlParser<int>();
+            NotificationRepository repository = new NotificationRepository(factory, parser);
+            return repository;
+        }
+
+        private static void UpdateNotifications(IEnumerable<NotificationEntity> notifications)
+        {
+            List<NotificationEntity> materializedNotifications = notifications.ToList();
+            int currentSkip = 0;
+
+            while (true)
+            {
+                Console.WriteLine($"Updating batch {currentSkip} to {currentSkip + WriteBatchSize}");
+                List<NotificationEntity> currentNotificationBatch = materializedNotifications
+                    .Skip(currentSkip)
+                    .Take(WriteBatchSize)
+                    .ToList();
+
+                _notificationRepository.BulkUpdate(currentNotificationBatch,
+                    nameof(NotificationEntity.Payload));
+
+                if (currentNotificationBatch.Count < WriteBatchSize)
+                {
+                    break;
+                }
+
+                currentSkip += WriteBatchSize;
+            }
         }
 
         public static void Main()
         {
-            List<string> list = new List<string>();
-            Console.WriteLine(list.Contains("teehee"));
+            //Console.WriteLine("Fetching notifications from database.");
+            //List<NotificationEntity> result = _notificationRepository
+            //    .GetNotificationsWithoutCustomerIds()
+            //    .ToList();
 
+            //Console.WriteLine($"{result.Count} notifications fetched.");
 
+            //Console.WriteLine("Parsing JSON payload.");
+            //foreach (NotificationEntity notificationEntity in result)
+            //{
+            //    JObject payloadObject = JObject.Parse(notificationEntity.Payload);
+            //    int customerDataId = int.Parse(payloadObject["customerDataId"].ToString());
+            //    notificationEntity.CustomerDataId = customerDataId;
+            //}
+
+            //Console.WriteLine("Parsed JSON payload");
+
+            //UpdateNotifications(result);
             DapperStartupMapping.RegisterCustomMaps("Supernova.Dapper.ConsoleTests.Models");
             IConnectionFactory connectionFactory = new ConnectionFactory("DefaultConnection");
             IParser<int> parser = new SqlParser<int>();
@@ -48,7 +97,7 @@ namespace Supernova.Dapper.ConsoleTests
                     TextField = "this is the end, my beautiful friend, the end"
                 };
 
-                repository.Insert(entity);
+                repository.Insert(null);
 
                 var allEntities = repository
                     .GetAll()
