@@ -18,7 +18,7 @@ namespace Supernova.Dapper.Parser.SqlServer
         private const string AndFilterKeyword = "AND";
         private const string OrFilterKeyword = "OR";
 
-        protected readonly IQueryTranslator _translator;
+        protected readonly IQueryTranslator _translator; 
 
         public SqlParser()
             : this(new SqlServerTranslator())
